@@ -1,35 +1,37 @@
-function createSetTimeout() {
-    var timerId = 0
-    var timerMap = {}
-
-    function setTimeoutPolyfill(callback, delay) {
-        var id = timerId++
-        timerMap[id] = true
-        var start = Date.now()
-        function triggerCallback() {
-            if (!timerMap[id]) return
-            if (Date.now() > start + delay) {
+import createSetTimeOut from './setTimeout.js'
+function createInterval () {
+    let intervalId = 0
+    let intervalMap = {}
+    var {setTimeoutPoly, clearTimeoutPoly} = createSetTimeOut()
+    function setIntervalPoly(callback, delay) {
+        let newId = intervalId++
+        function reiterate() {
+            intervalMap[newId] = setTimeoutPoly(function() {
                 callback()
-            } else {
-                requestIdleCallback(triggerCallback)
+                
+            console.log(intervalMap[newId])
+            if (intervalMap[newId]) {
+                reiterate()
             }
+            }, delay)
         }
-        requestIdleCallback(triggerCallback)
-        return id
+        reiterate()
+        return newId
     }
 
-    function clearTimeoutPoly(id) {
-        delete timerMap[id]
+    function clearIntervalPoly(id) {
+        clearTimeoutPoly(intervalMap[id])
+        delete intervalMap[id]
     }
-    return {setTimeoutPolyfill, clearTimeoutPoly}
+
+    return {setIntervalPoly, clearIntervalPoly}
 }
-var {setTimeoutPolyfill, clearTimeoutPoly} = createSetTimeout()
 
-console.log("start")
-var myId = setTimeoutPolyfill(function() {
+var {setIntervalPoly, clearIntervalPoly} = createInterval()
+
+var count = 0
+var myId = setIntervalPoly(function() {
     console.log("Welcome to jscafe")
+    count++
+    if (count >= 2) clearIntervalPoly(myId)
 }, 1000)
-clearTimeoutPoly(myId)
-
-
-console.log("end")
