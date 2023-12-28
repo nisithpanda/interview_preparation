@@ -1,4 +1,4 @@
-import createSetTimeOut from './setTimeout.js'
+import createSetTimeOut from './settimeout_polyfill.js'
 function createInterval () {
     let intervalId = 0
     let intervalMap = {}
